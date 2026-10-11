@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Periodic Table Practice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF3F5; --panel:#FFFFFF; --ink:#16252D; --muted:#4F636D; --line:#C5D2D8;
+  --accent:#17607E; --accent-ink:#FFFFFF; --accent-soft:#D8EAF1;
+  --good:#1F7A46; --good-soft:#D6EEDF; --bad:#B5352A; --bad-soft:#F6D9D5; --warn:#B7791F; --warn-soft:#FBEBC8;
+  --cell:#F7FAFB;
+  --display:'Bricolage Grotesque','Trebuchet MS','Segoe UI',system-ui,sans-serif;
+  --body:'Atkinson Hyperlegible','Segoe UI',Verdana,system-ui,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1B21; --panel:#172830; --ink:#E6EEF1; --muted:#9DB2BC; --line:#2F4651;
+    --accent:#5BB4D4; --accent-ink:#08202A; --accent-soft:#1D3C49;
+    --good:#58C98A; --good-soft:#1B3D2B; --bad:#F08A7E; --bad-soft:#47221E; --warn:#E6B04F; --warn-soft:#46361A;
+    --cell:#1C3039;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1B21; --panel:#172830; --ink:#E6EEF1; --muted:#9DB2BC; --line:#2F4651;
+  --accent:#5BB4D4; --accent-ink:#08202A; --accent-soft:#1D3C49;
+  --good:#58C98A; --good-soft:#1B3D2B; --bad:#F08A7E; --bad-soft:#47221E; --warn:#E6B04F; --warn-soft:#46361A;
+  --cell:#1C3039;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0}
+h1{font-size:clamp(28px,5vw,40px);font-weight:800}
+h2{font-size:24px;font-weight:600}
+.lede{color:var(--muted);margin:6px 0 0;max-width:62ch}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.session{font-size:15px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.mode{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:8px;transition:border-color .15s}
+.mode:hover{border-color:var(--accent)}
+.mode h2{font-size:21px}
+.mode p{margin:0;color:var(--muted);font-size:16px}
+.mode .best{margin-top:auto;font-weight:700;font-size:15px;color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.bar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.back{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;color:var(--muted)}
+.prog{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.count{font-size:15px;color:var(--muted);min-width:64px;text-align:right}
+.q{font-family:var(--display);font-size:clamp(20px,3.4vw,26px);font-weight:600;margin:0 0 14px}
+.clues{margin:0 0 16px;padding-left:22px}
+.clues li{margin:4px 0}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.opt{background:var(--cell);border:2px solid var(--line);border-radius:10px;padding:12px 14px;text-align:left;font-weight:700}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--good-soft);border-color:var(--good)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt.right::after{content:"  \2713";color:var(--good)}
+.opt.wrong::after{content:"  \2715";color:var(--bad)}
+.fb{margin-top:14px;padding:12px 14px;border-radius:10px;border-left:6px solid var(--line);background:var(--cell)}
+.fb.ok{border-color:var(--good);background:var(--good-soft)}
+.fb.no{border-color:var(--bad);background:var(--bad-soft)}
+.fb strong{display:block;margin-bottom:2px}
+.primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:11px 20px;font-weight:700;margin-top:14px}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.ghost{background:none;border:2px solid var(--accent);color:var(--accent);border-radius:10px;padding:9px 18px;font-weight:700;margin-top:14px;margin-right:8px}
+details{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--cell)}
+summary{cursor:pointer;font-weight:700;color:var(--accent)}
+/* periodic table */
+.ptwrap{overflow-x:auto;padding:4px 0 8px;margin-top:10px}
+.pt{display:grid;grid-template-columns:22px repeat(18,minmax(38px,1fr));gap:3px;min-width:760px}
+.gh,.ph{font-size:12px;color:var(--muted);text-align:center;align-self:end}
+.ph{align-self:center}
+.el{background:var(--cell);border:1.5px solid var(--line);border-radius:6px;min-height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;padding:2px;position:relative}
+.el .z{font-size:10px;color:var(--muted)}
+.el .s{font-family:var(--display);font-weight:800;font-size:16px}
+button.el:hover{border-color:var(--accent)}
+.el.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.el.sel .z{color:var(--accent-ink)}
+.el.hi{background:var(--warn-soft);border-color:var(--warn);box-shadow:0 0 0 2px var(--warn)}
+.el.ph2{border-style:dashed;color:var(--muted);font-size:11px;background:transparent}
+.el.r-good{background:var(--good-soft);border-color:var(--good)}
+.el.r-good::after{content:"\2713";position:absolute;top:0;right:3px;font-size:11px;color:var(--good);font-weight:700}
+.el.r-bad{background:var(--bad-soft);border-color:var(--bad)}
+.el.r-bad::after{content:"\2715";position:absolute;top:0;right:3px;font-size:11px;color:var(--bad);font-weight:700}
+.el.r-miss{background:var(--warn-soft);border-color:var(--warn);border-style:dashed}
+.el.r-miss::after{content:"!";position:absolute;top:0;right:4px;font-size:11px;color:var(--warn);font-weight:700}
+.el.r-neu{border-style:dashed;background:var(--accent-soft)}
+.el.r-good,.el.r-bad,.el.r-miss,.el.r-neu{color:var(--ink)}
+.el.r-good .z,.el.r-bad .z,.el.r-miss .z,.el.r-neu .z{color:var(--muted)}
+.el.r-neu{border-width:2px;border-color:var(--accent)}
+.readout{min-height:28px;font-weight:700;color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--muted);margin-top:10px}
+.big{font-family:var(--display);font-size:56px;font-weight:800;color:var(--accent);line-height:1}
+.sumrow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.sr{position:absolute;left:-9999px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+// ---------- DATA ----------
+const NAMES = "H Hydrogen,He Helium,Li Lithium,Be Beryllium,B Boron,C Carbon,N Nitrogen,O Oxygen,F Fluorine,Ne Neon,Na Sodium,Mg Magnesium,Al Aluminum,Si Silicon,P Phosphorus,S Sulfur,Cl Chlorine,Ar Argon,K Potassium,Ca Calcium,Sc Scandium,Ti Titanium,V Vanadium,Cr Chromium,Mn Manganese,Fe Iron,Co Cobalt,Ni Nickel,Cu Copper,Zn Zinc,Ga Gallium,Ge Germanium,As Arsenic,Se Selenium,Br Bromine,Kr Krypton,Rb Rubidium,Sr Strontium,Y Yttrium,Zr Zirconium,Nb Niobium,Mo Molybdenum,Tc Technetium,Ru Ruthenium,Rh Rhodium,Pd Palladium,Ag Silver,Cd Cadmium,In Indium,Sn Tin,Sb Antimony,Te Tellurium,I Iodine,Xe Xenon,Cs Cesium,Ba Barium,La Lanthanum,Ce Cerium,Pr Praseodymium,Nd Neodymium,Pm Promethium,Sm Samarium,Eu Europium,Gd Gadolinium,Tb Terbium,Dy Dysprosium,Ho Holmium,Er Erbium,Tm Thulium,Yb Ytterbium,Lu Lutetium,Hf Hafnium,Ta Tantalum,W Tungsten,Re Rhenium,Os Osmium,Ir Iridium,Pt Platinum,Au Gold,Hg Mercury,Tl Thallium,Pb Lead,Bi Bismuth,Po Polonium,At Astatine,Rn Radon,Fr Francium,Ra Radium,Ac Actinium,Th Thorium,Pa Protactinium,U Uranium,Np Neptunium,Pu Plutonium,Am Americium,Cm Curium,Bk Berkelium,Cf Californium,Es Einsteinium,Fm Fermium,Md Mendelevium,No Nobelium,Lr Lawrencium,Rf Rutherfordium,Db Dubnium,Sg Seaborgium,Bh Bohrium,Hs Hassium,Mt Meitnerium,Ds Darmstadtium,Rg Roentgenium,Cn Copernicium,Nh Nihonium,Fl Flerovium,Mc Moscovium,Lv Livermorium,Ts Tennessine,Og Oganesson".split(",").map(s=>{const i=s.indexOf(" ");return{sym:s.slice(0,i),name:s.slice(i+1)}});
+const EL = NAMES.map((e,i)=>({z:i+1,...e}));
+if (EL.length!==118) throw new Error("element count");
+
+// position: [row, group]. rows 1-7 periods, 9 = lanthanide row, 10 = actinide row
+function pos(z){
+  if(z===1) return [1,1]; if(z===2) return [1,18];
+  if(z<=4) return [2,z-2]; if(z<=10) return [2,z+8];
+  if(z<=12) return [3,z-10]; if(z<=18) return [3,z];
+  if(z<=36) return [4,z-18]; if(z<=54) return [5,z-36];
+  if(z<=56) return [6,z-54]; if(z<=71) return [9,z-54];      // La(57)->col 3 ... Lu(71)->col 17
+  if(z<=86) return [6,z-68];                                    // Hf(72)->4 ... Rn(86)->18
+  if(z<=88) return [7,z-86]; if(z<=103) return [10,z-86];      // Ac(89)->3 ... Lr(103)->17
+  return [7,z-100];                                             // Rf(104)->4 ... Og(118)->18
+}
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+EL.forEach(e=>{[e.row,e.col]=pos(e.z)});
+const bySym = s => EL.find(e=>e.sym===s);
+const group = e => (e.row<=7 ? e.col : null);
+
+// ---------- helpers ----------
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const pick = (a,n) => shuffle(a).slice(0,n);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function tableHTML({interactive=false, selected=new Set(), result=null, highlight=[]}={}){
+  let h='<div class="pt" role="group" aria-label="Periodic table">';
+  h+='<div></div>';
+  for(let g=1;g<=18;g++) h+=`<div class="gh" style="grid-row:1;grid-column:${g+1}">${g}</div>`;
+  for(let p=1;p<=7;p++) h+=`<div class="ph" style="grid-row:${p+1};grid-column:1">${p}</div>`;
+  const cellPos=e=>{const r=e.row<=7?e.row+1:e.row+1; return `grid-row:${r};grid-column:${e.col+1}`;};
+  // rows: header=1, periods 2-8, spacer row 9, lanth row 10, actin row 11
+  const rowOf=e=> e.row<=7 ? e.row+1 : (e.row===9?10:11);
+  h+=`<div style="grid-row:9;grid-column:1/-1;height:8px"></div>`;
+  h+=`<div class="el ph2" style="grid-row:7;grid-column:4">57\u201371</div><div class="el ph2" style="grid-row:8;grid-column:4">89\u2013103</div>`;
+  EL.forEach(e=>{
+    let cls='el';
+    if(selected.has(e.z)) cls+=' sel';
+    if(highlight.includes(e.z)) cls+=' hi';
+    if(result&&result[e.z]) cls+=' '+result[e.z];
+    const st=`grid-row:${rowOf(e)};grid-column:${e.col+1}`;
+    const inner=`<span class="z">${e.z}</span><span class="s">${e.sym}</span><span class="sr">${e.name}</span>`;
+    h+= interactive
+      ? `<button class="${cls}" style="${st}" data-z="${e.z}" aria-pressed="${selected.has(e.z)}" ${result?'disabled':''} title="${e.name}">${inner}</button>`
+      : `<div class="${cls}" style="${st}" title="${e.name}">${inner}</div>`;
+  });
+  h+='</div>';
+  return `<div class="ptwrap">${h}</div>`;
+}
+const refTable = (highlight=[]) => `<details><summary>Open the periodic table</summary>${tableHTML({highlight})}<p style="font-size:14px;color:var(--muted);margin:4px 0 0">Numbers across the top are group numbers. The detached row at the bottom holds elements 57\u201371 and 89\u2013103.</p></details>`;
+
+// ---------- question banks ----------
+const FAMILIES = [
+  {id:'alkali', name:'Alkali metals', correct:[3,11,19,37,55,87], neutral:[], hint:'Group 1, but hydrogen is not one of them.'},
+  {id:'alkaline', name:'Alkaline earth metals', correct:[4,12,20,38,56,88], neutral:[], hint:'Group 2.'},
+  {id:'transition', name:'Transition metals', correct:[...range(21,30),...range(39,48),...range(72,80)], neutral:range(104,112), hint:'The middle block, Groups 3\u201312. The detached row does not count. (Elements 104\u2013112 are optional.)'},
+  {id:'rare', name:'Rare earth metals (lanthanides)', correct:range(57,71), neutral:[21,39], hint:'The detached f-block row, La through Lu. Scandium and yttrium are optional bonus members.'},
+  {id:'metalloid', name:'Metalloids', correct:[5,14,32,33,51,52], neutral:[84,85], hint:'Along the staircase line. Some sources add Po or At, so those two are optional.'},
+  {id:'halogen', name:'Halogens', correct:[9,17,35,53,85], neutral:[117], hint:'Group 17. Tennessine (117) is optional.'},
+  {id:'noble', name:'Noble gases', correct:[2,10,18,36,54,86], neutral:[118], hint:'Group 18. Oganesson (118) is optional.'},
+];
+const sup = s => s; // strings below use <sup> directly
+
+const MYSTERY = [
+  {fam:'Alkali metals', clues:['Soft, shiny metal you could cut with a knife','Reacts violently with water','Has 1 valence electron'], why:'One valence electron plus a violent reaction with water points to Group 1, the alkali metals.'},
+  {fam:'Alkali metals', clues:['The outer part of its electron configuration is [Ne] 3s<sup>1</sup>','It is a metal'], why:'A single electron in the outer s subshell means 1 valence electron. That is sodium, an alkali metal.'},
+  {fam:'Alkaline earth metals', clues:['Has 2 valence electrons','Silvery metal that forms 2+ ions','Its electron configuration is [Ar] 4s<sup>2</sup>'], why:'Two valence electrons and a 2+ ion put it in Group 2. This one is calcium.'},
+  {fam:'Halogens', clues:['Has 7 valence electrons','Forms 1\u2212 ions','A very reactive nonmetal'], why:'Seven valence electrons and a 1\u2212 ion are the halogen signature (Group 17).'},
+  {fam:'Halogens', clues:['Its electron configuration is [Ne] 3s<sup>2</sup> 3p<sup>5</sup>'], why:'Add the outer electrons: 2 + 5 = 7 valence electrons. Seven means Group 17. This one is chlorine.'},
+  {fam:'Halogens', clues:['Red-brown liquid at room temperature','Has 7 valence electrons'], why:'Seven valence electrons means halogen. This one is bromine.'},
+  {fam:'Noble gases', clues:['A gas at room temperature','Almost never forms compounds','Its outer shell is full'], why:'A full outer shell explains why noble gases hardly react.'},
+  {fam:'Noble gases', clues:['Its electron configuration is [Ne] 3s<sup>2</sup> 3p<sup>6</sup>'], why:'2 + 6 = 8 valence electrons, a full outer shell. This is argon, a noble gas.'},
+  {fam:'Metalloids', clues:['Sits along the staircase line on the table','Has properties between metals and nonmetals','Used to make computer chips'], why:'Elements on the staircase with in-between properties are metalloids. This one is silicon.'},
+  {fam:'Transition metals', clues:['Found in the middle block of the table (Groups 3\u201312)','Shiny metal and a good conductor','Forms ions with different charges, such as 2+ or 3+'], why:'Variable ion charges are the transition metal trademark.'},
+  {fam:'Transition metals', clues:['Found in the d-block','Used to make steel','Many of its compounds are colorful'], why:'Iron is a d-block transition metal.'},
+  {fam:'Rare earth metals', clues:['Found in the detached row at the bottom of the table','Typically forms 3+ ions','Used in strong magnets, lighting, and electronics'], why:'The detached f-block row holds the lanthanides, also called rare earth metals.'},
+  {fam:'Rare earth metals', clues:['Silvery metals that are very hard to separate from one another','Located in the f-block'], why:'They are so chemically similar that separating them is difficult. They are the lanthanides.'},
+];
+const MYS_OPTS = ['Alkali metals','Alkaline earth metals','Transition metals','Rare earth metals','Metalloids','Halogens','Noble gases'];
+
+const CLASSIFY = [
+  ...['Na','Mg','Al','Fe','Cu','Au'].map(s=>[s,'Metal']),
+  ...['B','Si','Ge','As','Sb','Te'].map(s=>[s,'Metalloid']),
+  ...['C','N','O','P','S','Cl','Ne','Kr'].map(s=>[s,'Nonmetal']),
+];
+const CFG = [
+  {c:'1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>4</sup>', a:6, why:'The outer shell is n = 2: 2 + 4 = 6 valence electrons.'},
+  {c:'1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>1</sup>', a:1, why:'The outer shell is n = 3, which holds just 3s<sup>1</sup>. That is 1 valence electron.'},
+  {c:'[Ne] 3s<sup>2</sup> 3p<sup>5</sup>', a:7, why:'Outer shell n = 3: 2 + 5 = 7 valence electrons.'},
+  {c:'[Ne] 3s<sup>2</sup> 3p<sup>2</sup>', a:4, why:'Outer shell n = 3: 2 + 2 = 4 valence electrons.'},
+  {c:'[Ar] 4s<sup>2</sup>', a:2, why:'Outer shell n = 4 has only 4s<sup>2</sup>. That is 2 valence electrons.'},
+  {c:'1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>3</sup>', a:5, why:'Outer shell n = 2: 2 + 3 = 5 valence electrons.'},
+  {c:'[Ne] 3s<sup>2</sup> 3p<sup>1</sup>', a:3, why:'Outer shell n = 3: 2 + 1 = 3 valence electrons.'},
+  {c:'[Ne] 3s<sup>2</sup> 3p<sup>6</sup>', a:8, why:'Outer shell n = 3: 2 + 6 = 8. A full outer shell.'},
+];
+
+function buildValence(){
+  const mainZ = [3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,31,32,33,34,35,36,37,38,49,50,51,52,53,54,55,56];
+  const qs=[];
+  const mk=(z)=>{
+    const e=EL[z-1], g=group(e), v=g<=2?g:g-10;
+    return {type:'el', z, prompt:`How many valence electrons does <b>${e.name} (${e.sym})</b> have?`, answer:String(v), opts:null,
+      why:`${e.name} is in Group ${g}. ${g<=2?`Group ${g} means ${v} valence electron${v>1?'s':''}.`:`Groups 13\u201318 use the ones digit of the group number: ${g} \u2192 ${v}.`}`.replace('\u2192','means'), hi:[z]};
+  };
+  pick(mainZ,5).forEach(z=>qs.push(mk(z)));
+  qs.push({type:'el', z:2, prompt:'How many valence electrons does <b>Helium (He)</b> have?', answer:'2', why:'Helium is the exception. It is in Group 18, but its only shell (1s) holds just 2 electrons, so it has 2 valence electrons, not 8.', hi:[2]});
+  pick(CFG,2).forEach(c=>qs.push({type:'cfg', prompt:`An atom has the electron configuration <b>${c.c}</b>. How many valence electrons does it have?`, answer:String(c.a), why:c.why, hi:[]}));
+  pick([26,29,25,28],2).forEach(z=>{const e=EL[z-1];
+    qs.push({type:'tm', z, prompt:`How many valence electrons does <b>${e.name} (${e.sym})</b> have?`, answer:'It varies', opts:['1','2','8','It varies'],
+      why:`${e.name} is a transition metal. The group-number shortcut does not work here, and transition metals form ions with different charges, so the answer varies.`, hi:[z]});});
+  return shuffle(qs).map(q=>{
+    if(!q.opts){ const nums=shuffle([1,2,3,4,5,6,7,8].filter(n=>String(n)!==q.answer)).slice(0,3).map(String); q.opts=shuffle([q.answer,...nums]); }
+    return q;
+  });
+}
+const buildMystery = () => pick(MYSTERY,8).map(m=>({prompt:'Which family does this element belong to?', clues:m.clues, answer:m.fam, opts:MYS_OPTS, why:m.why, hi:[]}));
+const buildClassify = () => pick(CLASSIFY,10).map(([s,a])=>{const e=bySym(s);
+  return {prompt:`Is <b>${e.name} (${e.sym})</b> a metal, a nonmetal, or a metalloid?`, answer:a, opts:['Metal','Nonmetal','Metalloid'], hi:[e.z],
+    why: a==='Metalloid' ? `${e.name} sits on the staircase line and has properties between metals and nonmetals.` : a==='Metal' ? `${e.name} is a metal: it is left of the staircase and is shiny and a good conductor.` : `${e.name} is a nonmetal: it is right of the staircase.`};});
+
+// ---------- app state ----------
+const MODES = {
+  family:{title:'Family Finder', desc:'Click every element in a family on the periodic table, then check your work.'},
+  valence:{title:'Valence Check', desc:'Find valence electrons from the table or from an electron configuration.'},
+  mystery:{title:'Mystery Element', desc:'Use the clues to name the family.'},
+  classify:{title:'Metal or Not?', desc:'Sort elements into metals, nonmetals, and metalloids.'},
+};
+const best = {}; // mode -> {score,total}
+const S = {view:'menu', mode:null, qs:[], i:0, score:0, answered:false, picked:null, sel:new Set(), checked:false, res:null, hint:false};
+const app = document.getElementById('app');
+
+function start(mode){
+  Object.assign(S,{view:mode, mode, i:0, score:0, answered:false, picked:null, sel:new Set(), checked:false, res:null, hint:false});
+  S.qs = mode==='family' ? shuffle(FAMILIES) : mode==='valence' ? buildValence() : mode==='mystery' ? buildMystery() : buildClassify();
+  render();
+}
+function finish(){
+  const total=S.qs.length;
+  if(!best[S.mode]||S.score>best[S.mode].score) best[S.mode]={score:S.score,total};
+  S.view='summary'; render();
+}
+const head = (right='') => `<div class="top"><div><h1>Periodic Table Practice</h1><p class="lede">Self-checking practice. Nothing here is graded or saved.</p></div>${right}</div>`;
+const barHTML = () => `<div class="bar"><button class="back" data-act="menu">Menu</button><div class="prog"><i style="width:${(S.i/S.qs.length)*100}%"></i></div><div class="count">${S.i+1} of ${S.qs.length}</div></div>`;
+
+function render(){
+  if(S.view==='menu'){
+    const done=Object.values(best), sc=done.reduce((a,b)=>a+b.score,0), tt=done.reduce((a,b)=>a+b.total,0);
+    app.innerHTML = head(tt?`<div class="session">Best scores: ${sc} of ${tt}</div>`:'') +
+      `<div class="menu">${Object.entries(MODES).map(([k,m])=>`<button class="mode" data-mode="${k}"><h2>${m.title}</h2><p>${m.desc}</p>${best[k]?`<span class="best">Best: ${best[k].score} of ${best[k].total}</span>`:''}</button>`).join('')}</div>`;
+    return;
+  }
+  if(S.view==='summary'){
+    const total=S.qs.length, pct=Math.round(S.score/total*100);
+    const msg = pct===100?'Perfect round.':pct>=80?'Strong work. Review the ones you missed.':pct>=60?'Getting there. Check your notes on the ones you missed, then try again.':'Go back to your notes and the table, then try again. Each round mixes up the questions.';
+    app.innerHTML = head() + `<div class="card"><h2>${MODES[S.mode].title}</h2><div class="big" style="margin:12px 0 4px">${S.score} of ${total}</div><p>${msg}</p><button class="primary" data-mode="${S.mode}">Try again</button> <button class="ghost" data-act="menu">Back to menu</button></div>`;
+    return;
+  }
+  if(S.view==='family') return renderFamily();
+  renderMC();
+}
+
+function renderMC(){
+  const q=S.qs[S.i];
+  let h = head() + `<div class="card">${barHTML()}<h2 class="q">${q.prompt}</h2>`;
+  if(q.clues) h+=`<ul class="clues">${q.clues.map(c=>`<li>${c}</li>`).join('')}</ul>`;
+  h+=`<div class="opts">${q.opts.map(o=>{
+      let c='opt'; if(S.answered){ if(o===q.answer) c+=' right'; else if(o===S.picked) c+=' wrong'; }
+      return `<button class="${c}" data-opt="${esc(o)}" ${S.answered?'disabled':''}>${o}</button>`;}).join('')}</div>`;
+  if(S.answered){
+    const ok=S.picked===q.answer;
+    h+=`<div class="fb ${ok?'ok':'no'}" role="status"><strong>${ok?'Correct.':`Not quite. The answer is ${q.answer}.`}</strong>${q.why}</div>
+        <button class="primary" data-act="next">${S.i===S.qs.length-1?'See results':'Next question'}</button>`;
+  }
+  if(S.mode!=='mystery') h+=refTable(q.hi||[]);
+  else h+=refTable([]);
+  h+='</div>';
+  app.innerHTML=h;
+}
+
+function renderFamily(){
+  const f=S.qs[S.i];
+  let h = head() + `<div class="card">${barHTML()}<h2 class="q">Click every <u>${f.name}</u> on the table.</h2>
+    <p class="lede" style="margin:0 0 6px">Click again to un-select. Press Check when you are done.</p>`;
+  h+= tableHTML({interactive:true, selected:S.sel, result:S.res});
+  h+=`<div class="readout" id="readout" aria-live="polite">&nbsp;</div>`;
+  if(!S.checked){
+    h+=`<button class="primary" data-act="check" ${S.sel.size?'':'disabled'}>Check my answer</button><button class="ghost" data-act="hint">${S.hint?'Hide hint':'Show hint'}</button>`;
+    if(S.hint) h+=`<div class="fb"><strong>Hint</strong>${f.hint}</div>`;
+  } else {
+    const r=S.lastResult;
+    h+=`<div class="fb ${r.perfect?'ok':'no'}" role="status"><strong>${r.perfect?'Every one correct, and none missing.':`You found ${r.right} of ${f.correct.length}.${r.wrong?` ${r.wrong} wrong click${r.wrong>1?'s':''}.`:''}`}</strong>${r.perfect?'':'Elements marked with ! were missed. Elements marked with \u2715 do not belong. Dashed blue cells are optional and not counted.'}</div>
+        <div class="legend"><span>\u2713 correct</span><span>\u2715 does not belong</span><span>! missed</span><span>dashed blue = optional</span></div>
+        <button class="primary" data-act="next">${S.i===S.qs.length-1?'See results':'Next family'}</button>`;
+  }
+  h+='</div>'; app.innerHTML=h;
+}
+
+function checkFamily(){
+  const f=S.qs[S.i], res={}; let right=0, wrong=0;
+  const corr=new Set(f.correct), neu=new Set(f.neutral);
+  f.correct.forEach(z=>{ if(S.sel.has(z)){res[z]='r-good';right++;} else res[z]='r-miss'; });
+  S.sel.forEach(z=>{ if(corr.has(z)) return; if(neu.has(z)) res[z]='r-neu'; else {res[z]='r-bad';wrong++;} });
+  f.neutral.forEach(z=>{ if(!res[z]) res[z]='r-neu'; });
+  const perfect = right===f.correct.length && wrong===0;
+  S.lastResult={right,wrong,perfect}; if(perfect) S.score++;
+  S.res=res; S.checked=true; render();
+}
+
+// ---------- events ----------
+app.addEventListener('click', e=>{
+  const t=e.target.closest('button, summary'); if(!t) return;
+  if(t.dataset.mode){ start(t.dataset.mode); return; }
+  const act=t.dataset.act;
+  if(act==='menu'){ S.view='menu'; render(); return; }
+  if(act==='hint'){ S.hint=!S.hint; render(); return; }
+  if(act==='check'){ checkFamily(); return; }
+  if(act==='next'){ S.i++; S.answered=false; S.picked=null; S.sel=new Set(); S.checked=false; S.res=null; S.hint=false;
+    if(S.i>=S.qs.length){ S.i=S.qs.length-1; finish(); } else render(); window.scrollTo({top:0}); return; }
+  if(t.dataset.opt!==undefined && !S.answered){
+    S.picked=t.dataset.opt; S.answered=true; if(S.picked===S.qs[S.i].answer) S.score++; render(); return; }
+  if(t.dataset.z && S.view==='family' && !S.checked){
+    const z=+t.dataset.z; S.sel.has(z)?S.sel.delete(z):S.sel.add(z);
+    const sy=window.scrollY, sx=document.querySelector('.ptwrap')?.scrollLeft||0;
+    render(); const w=document.querySelector('.ptwrap'); if(w) w.scrollLeft=sx; window.scrollTo({top:sy});
+    const b=document.querySelector(`[data-z="${z}"]`); if(b) b.focus({preventScroll:true});
+    const el=EL[z-1]; document.getElementById('readout').textContent=`${el.name} (${el.sym}), atomic number ${el.z}`;
+  }
+});
+app.addEventListener('mouseover', e=>{
+  const b=e.target.closest('[data-z]'), r=document.getElementById('readout');
+  if(b&&r){const el=EL[+b.dataset.z-1]; r.textContent=`${el.name} (${el.sym}), atomic number ${el.z}`;}
+});
+app.addEventListener('focusin', e=>{
+  const b=e.target.closest('[data-z]'), r=document.getElementById('readout');
+  if(b&&r){const el=EL[+b.dataset.z-1]; r.textContent=`${el.name} (${el.sym}), atomic number ${el.z}`;}
+});
+render();
+</script>
+</body>
+</html>
